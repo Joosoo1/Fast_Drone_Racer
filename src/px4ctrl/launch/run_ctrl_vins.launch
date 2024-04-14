@@ -1,0 +1,13 @@
+<launch>
+
+	<arg name="odom_topic" default="/vins_fusion/imu_propagate" />
+	<arg name="cmd_topic" default="/planning/position_cmd" />
+
+	<node pkg="px4ctrl" type="px4ctrl_node" name="px4ctrl" output="screen">
+			
+		<remap from="~odom" to="$(arg odom_topic)" />
+		<remap from="~cmd" to="$(arg cmd_topic)" />
+
+        <rosparam command="load" file="$(find px4ctrl)/config/ctrl_param_fpv.yaml" />
+	</node>
+</launch>

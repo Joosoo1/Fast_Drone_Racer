@@ -1,0 +1,3 @@
+<launch>
+	<node name="vins_fusion" pkg="vins"  type="vins_node" output="screen" args="$(find vins)/../config/fast250/rmua.yaml"/>
+</launch> 
