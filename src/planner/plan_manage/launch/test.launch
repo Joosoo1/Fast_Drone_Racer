@@ -1,0 +1,7 @@
+<launch>
+    <arg name="global_circle_topic" default="/global_gate_pose"/>
+    
+    <node pkg="pose_sub" name="global_circle_sub_node" type="global_circle_sub_node" output="screen">
+        <remap from="~gate_poses" to="$(arg global_circle_topic)"/>
+    </node>
+</launch>

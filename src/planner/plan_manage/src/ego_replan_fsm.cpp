@@ -44,7 +44,7 @@ namespace ego_planner
     global_circle_sub_ = nh.subscribe("fsm/global_circle_pose", 1, &EGOReplanFSM::globalCircleCallback, this);
 
     // waypoint_sub_与local_circle_sub_一致，实际部署时为订阅local_circle_sub_
-    waypoint_sub_ = nh.subscribe("fsm/goal", 1, &EGOReplanFSM::waypointCallback, this);// --->用于触发
+    // waypoint_sub_ = nh.subscribe("fsm/goal", 1, &EGOReplanFSM::waypointCallback, this);// --->用于触发
     local_circle_sub_ = nh.subscribe("fsm/local_circle_pose", 1, &EGOReplanFSM::localCircleCallback, this);// 
     
     // publish
@@ -66,6 +66,8 @@ namespace ego_planner
       ros::spinOnce();
       ros::Duration(0.001).sleep();
     }
+
+    this->flag_takeoff_ = true;
 
     // 预设的全局轨迹点,规划轨迹进行飞行，在全局导航点为配置文件爱你给出时使用
     readGivenWpsAndPlan();
@@ -593,10 +595,37 @@ namespace ego_planner
 
   void EGOReplanFSM::localCircleCallback(const bbox_ex_msgs::BoundingBoxes::ConstPtr& msg)
   {
-    if (this->flag_recived_global_goal_)
+    if (!this->flag_recived_global_goal_)
     {
       ROS_WARN("[EGO_REPLAN_FSM]: waitting for global circle position!");
       return;
+    }
+
+    if(msg->bounding_boxes.size() == 0){
+      ROS_WARN("[EGO_REPLAN_FSM]: no recived local circle position!");
+      return;
+    }
+    else{
+      Eigen::Vector3d circle_center, circle_center_temp, extend_position, pos_offset;
+      Eigen::Matrix3d rotation_matrix;
+      rotation_matrix  = this->sensor_ori_.toRotationMatrix();
+      Eigen::Vector3d circle_center_world;
+
+      for(int i = 0; i < msg->bounding_boxes.size(); i++){
+        circle_center[0] = msg->bounding_boxes[i].center_z;
+        circle_center[1] = -msg->bounding_boxes[i].center_x;
+        circle_center[2] = -msg->bounding_boxes[i].center_y;
+        circle_center_temp = rotation_matrix * circle_center;
+        circle_center_world = this->sensor_pos_ + circle_center_temp;
+        double curr_dist = 0.0, mini_dist = 999999.0;
+      }
+      this->wps_[this->wpt_id_] = circle_center_world;
+      // have_trigger_ = true;
+
+      if (planNextWaypoint(circle_center_world))
+      {
+        // have_trigger_ = true;
+      }
     }
     // TODO:模仿waypointCallback
   }
@@ -660,6 +689,13 @@ namespace ego_planner
     odom_pos_(0) = msg->pose.pose.position.x;
     odom_pos_(1) = msg->pose.pose.position.y;
     odom_pos_(2) = msg->pose.pose.position.z;
+
+    this->sensor_pos_ = odom_pos_;
+
+    this->sensor_ori_.x() = msg->pose.pose.orientation.x;
+    this->sensor_ori_.y() = msg->pose.pose.orientation.y;
+    this->sensor_ori_.z() = msg->pose.pose.orientation.z;
+    this->sensor_ori_.w() = msg->pose.pose.orientation.w;
 
     odom_vel_(0) = msg->twist.twist.linear.x;
     odom_vel_(1) = msg->twist.twist.linear.y;

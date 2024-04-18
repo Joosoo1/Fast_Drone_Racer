@@ -91,6 +91,9 @@ namespace ego_planner
     Eigen::Vector3d odom_pos_, odom_vel_, odom_acc_;     // odometry state
     std::vector<Eigen::Vector3d> wps_, global_points_; // 
 
+    Eigen::Vector3d sensor_pos_;
+    Eigen::Quaterniond sensor_ori_;
+
     /* ROS utils */
     ros::NodeHandle node_;
     ros::Timer exec_timer_, safety_timer_;

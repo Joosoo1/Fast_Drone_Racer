@@ -2,17 +2,19 @@
     <arg name="odometry_topic" default="/vins_fusion/imu_propagate"/>
     <arg name="depth_topic" default="/camera/depth/image_rect_raw"/>
     <arg name="extrinsic_topic" default="/vins_fusion/extrinsic"/>
+    <arg name="local_circle_topic" default="/detect_gate_pose"/>
+    <arg name="global_circle_topic" default="/global_gate_pose"/>
 
-    <arg name="cx" default="324.6372985839844" />
-    <arg name="cy" default="240.3457794189453" />
-    <arg name="fx" default="385.5382385253906" />
-    <arg name="fy" default="385.5382385253906" />
+    <arg name="cx" default="325.18890380859375" />
+    <arg name="cy" default="241.5621795654297" />
+    <arg name="fx" default="387.8065185546875" />
+    <arg name="fy" default="387.8065185546875" />
 
-    <arg name="max_vel" default="4.0" />
+    <arg name="max_vel" default="1.0" />
     <arg name="max_acc" default="6.0" />
-    <arg name="max_jer" default="20.0" />
+    <arg name="max_jer" default="4.0" />
     <!-- 传感器探测距离的1.5倍 -->    
-    <arg name="planning_horizon" default="7.5"/>
+    <arg name="planning_horizon" default="6.0">
     <arg name="use_multitopology_trajs" default="false"/>
     <arg name="drone_id" default="0" />
 
@@ -27,8 +29,8 @@
         <remap from="~fsm/goal" to="/goal_with_id"/>
         <remap from="~fsm/ground_height_measurement" to = "/ground_height_measurement"/>
         <!-- rmua -->
-        <remap from="~fsm/local_circle_pose" to = "/local_circle_pose"/>
-        <remap from="~fsm/global_circle_pose" to = "/global_circle_pose"/>
+        <remap from="~fsm/local_circle_pose" to = "$(arg local_circle_topic)"/>
+        <remap from="~fsm/global_circle_pose" to = "$(arg global_circle_topic)"/>
 
         <!-- 重规划时间阈值 -->
         <param name="fsm/thresh_replan_time" value="1.0" type="double"/>
@@ -43,12 +45,12 @@
         <remap from="~grid_map/depth" to ="$(arg depth_topic)"/>
         <remap from="~grid_map/extrinsic" to ="$(arg extrinsic_topic)"/>
         <!-- 栅格地图参数 -->
-        <param name="grid_map/resolution" value="0.1" />
+        <param name="grid_map/resolution" value="0.15" />
         <param name="grid_map/local_update_range_x" value="5.5" />
         <param name="grid_map/local_update_range_y" value="5.5" />
-        <param name="grid_map/local_update_range_z" value="5.0" /> 
+        <param name="grid_map/local_update_range_z" value="4.5" /> 
 
-        <param name="grid_map/obstacles_inflation" value="0.1" />
+        <param name="grid_map/obstacles_inflation" value="0.299" />
         <param name="grid_map/local_map_margin" value="10"/>
         <param name="grid_map/enable_virtual_wall" value="false"/>
         <param name="grid_map/virtual_ceil" value="3.0"/>
@@ -68,7 +70,7 @@
         <param name="grid_map/depth_filter_mindist" value="0.2"/>
         <param name="grid_map/depth_filter_margin" value="2"/>
         <param name="grid_map/k_depth_scaling_factor" value="10.0"/>
-        <param name="grid_map/skip_pixel" value="1"/>
+        <param name="grid_map/skip_pixel" value="2"/>
 
         <!-- local fusion -->
         <param name="grid_map/p_hit" value="0.65"/>
@@ -77,8 +79,8 @@
         <param name="grid_map/p_max" value="0.90"/>
         <param name="grid_map/p_occ" value="0.80"/>
         <param name="grid_map/fading_time" value="1000.0"/>
-        <param name="grid_map/min_ray_length" value="0.1"/>
-        <param name="grid_map/max_ray_length" value="4.5"/>
+        <param name="grid_map/min_ray_length" value="0.3"/>
+        <param name="grid_map/max_ray_length" value="5.0"/>
         <param name="grid_map/visualization_truncate_height" value="20.0"/>
         <param name="grid_map/show_occ_time" value="false"/>
         <!-- important -->
@@ -138,5 +140,9 @@
         <param name="robot_scale" value="0.35"/>
         <param name="tf45" value="false"/>
         <param name="drone_id" value="$(arg drone_id)"/>
+    </node>
+
+    <node pkg="pose_sub" name="global_circle_sub_node" type="global_circle_sub_node" output="screen">
+        <remap from="~gate_poses" to="$(arg global_circle_topic)"/>
     </node>
 </launch>

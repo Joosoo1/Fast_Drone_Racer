@@ -47,7 +47,7 @@
         <param name="grid_map/resolution" value="0.1" />
         <param name="grid_map/local_update_range_x" value="5.5" />
         <param name="grid_map/local_update_range_y" value="5.5" />
-        <param name="grid_map/local_update_range_z" value="5.0" /> 
+        <param name="grid_map/local_update_range_z" value="" /> 
 
         <param name="grid_map/obstacles_inflation" value="0.1" />
         <param name="grid_map/local_map_margin" value="10"/>
