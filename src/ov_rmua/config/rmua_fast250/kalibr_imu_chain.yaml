@@ -1,17 +1,15 @@
-%YAML:1.0
-
 imu0:
   T_i_b:
     - [1.0, 0.0, 0.0, 0.0]
     - [0.0, 1.0, 0.0, 0.0]
     - [0.0, 0.0, 1.0, 0.0]
     - [0.0, 0.0, 0.0, 1.0]
-  accelerometer_noise_density: 0.2   # [ m / s^2 / sqrt(Hz) ]   ( accel "white noise" )
-  accelerometer_random_walk: 0.002   # [ m / s^3 / sqrt(Hz) ].  ( accel bias diffusion )
-  gyroscope_noise_density: 0.05      # [ rad / s / sqrt(Hz) ]   ( gyro "white noise" )
-  gyroscope_random_walk: 0.0004      # [ rad / s^2 / sqrt(Hz) ] ( gyro bias diffusion )
+  accelerometer_noise_density: 0.018   # [ m / s^2 / sqrt(Hz) ]   ( accel "white noise" )
+  accelerometer_random_walk: 0.0003   # [ m / s^3 / sqrt(Hz) ].  ( accel bias diffusion )
+  gyroscope_noise_density: 0.003      # [ rad / s / sqrt(Hz) ]   ( gyro "white noise" )
+  gyroscope_random_walk: 0.000009      # [ rad / s^2 / sqrt(Hz) ] ( gyro bias diffusion )
   rostopic: /mavros/imu/data_raw
-  time_offset: -0.0084
+  time_offset: -0.0034
   update_rate: 120.0
   # three different modes supported:
   # "calibrated" (same as "kalibr"), "kalibr", "rpng"
