@@ -267,8 +267,8 @@ void GridMap::extrinsicCallback(const nav_msgs::OdometryConstPtr &odom)
   md_.cam2body_(3, 3) = 1.0;
 
   // 打印矩阵
-  std::cout << "cam2body: " << std::endl;
-  std::cout << md_.cam2body_ << std::endl;
+  // std::cout << "cam2body: " << std::endl;
+  // std::cout << md_.cam2body_ << std::endl;
 }
 
 void GridMap::moveRingBuffer()

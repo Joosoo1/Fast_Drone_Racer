@@ -3,14 +3,14 @@
     <arg name="depth_topic" default="/camera/depth/image_rect_raw"/>
     <arg name="extrinsic_topic" default="/ov_msckf/loop_extrinsic"/>
 
-    <arg name="cx" default="323.431884765625" />
-    <arg name="cy" default="238.01177978515625" />
-    <arg name="fx" default="386.17555065917969" />
-    <arg name="fy" default="386.17555065917969" />
+    <arg name="cx" default="325.18890380859375" />
+    <arg name="cy" default="241.5621795654297" />
+    <arg name="fx" default="387.8065185546875" />
+    <arg name="fy" default="387.8065185546875" />
 
     <arg name="max_vel" default="1.0" />
     <arg name="max_acc" default="6.0" />
-    <arg name="max_jer" default="20.0" />
+    <arg name="max_jer" default="4.0" />
     
     <!-- 传感器探测距离的1.5倍 -->    
     <arg name="planning_horizon" default="7.5"/>
@@ -30,6 +30,7 @@
         <!-- rmua -->
         <remap from="~fsm/local_circle_pose" to = "/local_circle_pose"/>
         <remap from="~fsm/global_circle_pose" to = "/global_circle_pose"/>
+        <remap from="~fsm/takeoff_land" to="/px4ctrl/takeoff_land"/>
 
         <!-- 重规划时间阈值 -->
         <param name="fsm/thresh_replan_time" value="1.0" type="double"/>
@@ -63,13 +64,13 @@
         <param name="grid_map/fy" value="$(arg fy)"/>
 
         <!-- depth filter -->
-        <param name="grid_map/use_depth_filter" value="false"/>
+        <param name="grid_map/use_depth_filter" value="true"/>
         <param name="grid_map/depth_filter_tolerance" value="0.15"/>
         <param name="grid_map/depth_filter_maxdist" value="5.0"/>
         <param name="grid_map/depth_filter_mindist" value="0.2"/>
         <param name="grid_map/depth_filter_margin" value="2"/>
-        <param name="grid_map/k_depth_scaling_factor" value="10.0"/>
-        <param name="grid_map/skip_pixel" value="1"/>
+        <param name="grid_map/k_depth_scaling_factor" value="1000.0"/>
+        <param name="grid_map/skip_pixel" value="2"/>
 
         <!-- local fusion -->
         <param name="grid_map/p_hit" value="0.65"/>
@@ -78,8 +79,8 @@
         <param name="grid_map/p_max" value="0.90"/>
         <param name="grid_map/p_occ" value="0.80"/>
         <param name="grid_map/fading_time" value="1000.0"/>
-        <param name="grid_map/min_ray_length" value="0.1"/>
-        <param name="grid_map/max_ray_length" value="4.5"/>
+        <param name="grid_map/min_ray_length" value="0.3"/>
+        <param name="grid_map/max_ray_length" value="5.0"/>
         <param name="grid_map/visualization_truncate_height" value="20.0"/>
         <param name="grid_map/show_occ_time" value="false"/>
         <!-- important -->

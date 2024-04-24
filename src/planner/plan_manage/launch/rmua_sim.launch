@@ -10,7 +10,7 @@
 
     <arg name="max_vel" default="4.0" />
     <arg name="max_acc" default="6.0" />
-    <arg name="max_jer" default="20.0" />
+    <arg name="max_jer" default="4.0" />
     <!-- 传感器探测距离的1.5倍 -->    
     <arg name="planning_horizon" default="7.5"/>
     <arg name="use_multitopology_trajs" default="false"/>
@@ -67,8 +67,8 @@
         <param name="grid_map/depth_filter_maxdist" value="5.0"/>
         <param name="grid_map/depth_filter_mindist" value="0.2"/>
         <param name="grid_map/depth_filter_margin" value="2"/>
-        <param name="grid_map/k_depth_scaling_factor" value="10.0"/>
-        <param name="grid_map/skip_pixel" value="1"/>
+        <param name="grid_map/k_depth_scaling_factor" value="1000.0"/>
+        <param name="grid_map/skip_pixel" value="2"/>
 
         <!-- local fusion -->
         <param name="grid_map/p_hit" value="0.65"/>

@@ -13,6 +13,9 @@ namespace ego_planner
     flag_escape_emergency_ = true;
     mandatory_stop_ = false;
 
+    flag_takeoff_ = false;
+    flag_land_ = false;
+
     /*  fsm param  */
     nh.param("fsm/thresh_replan_time", replan_thresh_, -1.0);
     nh.param("fsm/planning_horizon", planning_horizen_, -1.0);
@@ -26,8 +29,8 @@ namespace ego_planner
     planner_manager_.reset(new EGOPlannerManager);
     planner_manager_->initPlanModules(nh, visualization_);
 
-    have_trigger_ = !flag_realworld_experiment_;// 默认为触发
-    // have_trigger_ = false;
+    // have_trigger_ = !flag_realworld_experiment_;// 默认为触发
+    have_trigger_ = false;
     no_replan_thresh_ = 0.5 * emergency_time_ * planner_manager_->pp_.max_vel_;
 
     // /* callback */
@@ -55,13 +58,11 @@ namespace ego_planner
 
     // 请求起飞和降落模式
     takeoff_land_pub_ = nh.advertise<quadrotor_msgs::TakeoffLand>("fsm/takeoff_land", 1);
-    takeoff_land_msg_.takeoff_land_cmd = quadrotor_msgs::TakeoffLand::TAKEOFF;
-    takeoff_land_pub_.publish(takeoff_land_msg_);
 
     // for test
-    ROS_INFO("Wait for 5 second, for takeoff drone");
+    ROS_INFO("Wait for 10 second, for takeoff drone");
     int count = 0;
-    while (ros::ok() && count++ < 5000)
+    while (ros::ok() && count++ < 10000)
     {
       ros::spinOnce();
       ros::Duration(0.001).sleep();
@@ -94,6 +95,17 @@ namespace ego_planner
       if (!have_odom_)
       {
         goto force_return; // return;
+      }
+
+      if (!flag_takeoff_){
+        quadrotor_msgs::TakeoffLand cmd;
+        cmd.takeoff_land_cmd = quadrotor_msgs::TakeoffLand::TAKEOFF;
+        takeoff_land_pub_.publish(cmd);
+        flag_takeoff_ = true;
+      }
+
+      if (odom_pos_(2) < 0.5){
+        goto force_return;
       }
       changeFSMExecState(WAIT_TARGET, "FSM");
       break;
@@ -187,8 +199,9 @@ namespace ego_planner
         have_trigger_ = false;
         if (!flag_land_)
         {
-          takeoff_land_msg_.takeoff_land_cmd = quadrotor_msgs::TakeoffLand::LAND;
-          takeoff_land_pub_.publish(takeoff_land_msg_);
+          quadrotor_msgs::TakeoffLand cmd;
+          cmd.takeoff_land_cmd = quadrotor_msgs::TakeoffLand::LAND;
+          takeoff_land_pub_.publish(cmd);
           flag_land_ = true;
         }
         
@@ -601,33 +614,45 @@ namespace ego_planner
       return;
     }
 
-    if(msg->bounding_boxes.size() == 0){
+    if(msg->bounding_boxes.size() == 0)
+    {
       ROS_WARN("[EGO_REPLAN_FSM]: no recived local circle position!");
       return;
     }
-    else{
+    else
+    {
       Eigen::Vector3d circle_center, circle_center_temp, extend_position, pos_offset;
       Eigen::Matrix3d rotation_matrix;
       rotation_matrix  = this->sensor_ori_.toRotationMatrix();
       Eigen::Vector3d circle_center_world;
+      double mini_dist_error = 99999.0;
+      double cur_dist_error;
 
-      for(int i = 0; i < msg->bounding_boxes.size(); i++){
+      for(size_t i = 0; i < msg->bounding_boxes.size(); i++)
+      {
         circle_center[0] = msg->bounding_boxes[i].center_z;
         circle_center[1] = -msg->bounding_boxes[i].center_x;
         circle_center[2] = -msg->bounding_boxes[i].center_y;
+
         circle_center_temp = rotation_matrix * circle_center;
         circle_center_world = this->sensor_pos_ + circle_center_temp;
-        double curr_dist = 0.0, mini_dist = 999999.0;
+        cur_dist_error = (circle_center_world - this->wps_[this->wpt_id_]).norm();
+        if (cur_dist_error < mini_dist_error)
+        {
+          this->cur_circle_pose_ = circle_center_world;
+          mini_dist_error = cur_dist_error;
+        }
       }
-      this->wps_[this->wpt_id_] = circle_center_world;
-      // have_trigger_ = true;
 
-      if (planNextWaypoint(circle_center_world))
+      if(mini_dist_error < 3.0 && (odom_pos_ - this->cur_circle_pose_).norm() > 2){
+        this->wps_[this->wpt_id_] = this->cur_circle_pose_;// 更新局部目标点
+      }
+
+      if (planNextWaypoint(this->wps_[this->wpt_id_]))
       {
-        // have_trigger_ = true;
+        have_trigger_ = true;
       }
     }
-    // TODO:模仿waypointCallback
   }
 
   void EGOReplanFSM::waypointCallback(const quadrotor_msgs::GoalSetPtr &msg)
@@ -643,7 +668,7 @@ namespace ego_planner
 
     if (planNextWaypoint(cur_wp))
     {
-      // have_trigger_ = true;
+      have_trigger_ = true;
     }
   }
 
@@ -671,9 +696,9 @@ namespace ego_planner
     }
 
     // plan first global waypoint
-    wpt_id_ = 0;
+    this->wpt_id_ = 0;
     // std::cout  << "wps_[wpt_id_]" << wps_[wpt_id_].transpose() << std::endl;
-    planNextWaypoint(this->wps_[wpt_id_]);
+    planNextWaypoint(this->wps_[this->wpt_id_]);
   }
 
   void EGOReplanFSM::mandatoryStopCallback(const std_msgs::Empty &msg)

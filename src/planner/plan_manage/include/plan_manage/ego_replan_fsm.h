@@ -93,6 +93,7 @@ namespace ego_planner
 
     Eigen::Vector3d sensor_pos_;
     Eigen::Quaterniond sensor_ori_;
+    Eigen::Vector3d cur_circle_pose_;
 
     /* ROS utils */
     ros::NodeHandle node_;
@@ -102,9 +103,8 @@ namespace ego_planner
 
     // 起飞降落
     ros::Publisher takeoff_land_pub_;
-    quadrotor_msgs::TakeoffLand takeoff_land_msg_;
-    bool flag_takeoff_ = false;
-    bool flag_land_ = false;
+    bool flag_takeoff_;
+    bool flag_land_;
 
     /* state machine functions */
     void execFSMCallback(const ros::TimerEvent &e);
