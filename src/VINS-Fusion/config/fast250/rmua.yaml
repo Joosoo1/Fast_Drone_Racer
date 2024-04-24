@@ -9,7 +9,7 @@ imu_topic: "/mavros/imu/data_raw"
 image0_topic: "/camera/infra1/image_rect_raw"
 image1_topic: "/camera/infra2/image_rect_raw"
 
-output_path: ""/home/cat/rmua_drone/vins_output""
+output_path: "/home/cat/rmua_drone/vins_output
 
 cam0_calib: "left.yaml"
 cam1_calib: "right.yaml"
